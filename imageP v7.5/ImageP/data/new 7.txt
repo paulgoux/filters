@@ -1,0 +1,603 @@
+class fileOutput1 {
+  BMS Bms;
+  public PApplet applet;
+  public FileWriter output;
+  float x, y, w, h;
+  public boolean save, onMouseUp, mdown, debug, append, appendFile, match, 
+    append2, overWrite, overWriteOnce = true, writeOnce, writeFile, click, saveImage, 
+    getPermission = true, fileExists, reWrite, folderExists, overWriteFirst, overWritelast, 
+    writeFirst, folderCreated, saveAudio, saveVideo, getWritePermission, showDialog, 
+    checkFile;
+  public int counter = -1, counter2, writeCount, failCount, folderSize;
+  public File file, file2, file3;
+  public File[] SDcards ; 
+  public String location, filePath, folderPath = "";
+  String text = "oioijsofoivnsoindv", absolutePath, ext, fileName, fileContent = "";
+  String androidDialogueTitle = "oiahoidhao", 
+    dialogueB1Title = "", dialogueB2Title = "", dialogueBody;
+  public String title1 = "Would you like to create File";
+  public String title2 = "Would you like to overWrite File";
+  String currentFile, lastFile;
+
+  Permission p;
+  Activity activity;
+  Context context;
+  TextView msg;
+  int msgId;
+  PImage img;
+  dialogueBox dbox, dbox1, dbox2, dbox3;
+
+  fileOutput1() {
+    
+  };
+  
+  fileOutput1(BMS bms) {
+    Bms = bms;
+    applet = bms.applet;
+    p = new Permission(applet, "WRITE_EXTERNAL_STORAGE");
+    init();
+  };
+
+  fileOutput1(boolean a,BMS bms) {
+    Bms = bms;
+    applet = bms.applet;
+    p = new Permission(applet, "WRITE_EXTERNAL_STORAGE");
+    overWrite = true;
+    appendFile = true;
+  };
+
+  fileOutput1(PApplet app) {
+    applet = app;
+    p = new Permission(applet, "WRITE_EXTERNAL_STORAGE");
+    textBox = new TextArea1(20, 20, 400, 20, "Click to add text",this);
+    init();
+  };
+  //currently unused
+  fileOutput1(String location,BMS bms) {
+    Bms = bms;
+    applet = bms.applet;
+    p = new Permission(applet, "WRITE_EXTERNAL_STORAGE");
+    //img = applet.get();
+    setLocation(location);
+    init();
+  };
+
+  fileOutput1(BMS bms, String location) {
+    
+    Bms = bms;
+    applet = bms.applet;
+    this.applet = applet;
+    p = new Permission(applet, "WRITE_EXTERNAL_STORAGE");
+    setLocation(location);
+    init();
+  };
+
+  void getAndroidInfo() {
+    activity = applet.getActivity(); 
+    context = activity.getApplicationContext();
+    absolutePath = new String(Environment.getExternalStorageDirectory().getAbsolutePath());
+  };
+
+  void init() {
+    x = 0;
+    y = 0;
+    w = applet.width;
+    h = applet.height;
+
+    String s1 = "Would you like to overWrite "+fileName+"."+ext+"?";
+    float dboxWidth = 120;
+    float tSize = 20;
+    applet.textSize(tSize);
+    float dw = applet.textWidth(s1)+100;
+    float dboxHeight = 150;
+    float dx = applet.width/2-dw/2;
+    float dy = applet.height/2-50/2;
+  };
+
+  void loadStrings() {
+    loadFile();
+  };
+
+  String loadFile() {
+
+    FileInputStream fis = null;
+    if (writeFile) {
+      try {
+
+        fis = new FileInputStream (new File(file2.getAbsolutePath()));
+
+        InputStreamReader isr = new InputStreamReader(fis);
+        // READ STRING OF UNKNOWN LENGTH
+        StringBuilder sb = new StringBuilder();
+        char[] inputBuffer = new char[2048];
+        int l;
+        // FILL BUFFER WITH DATA
+        while ((l = isr.read(inputBuffer)) != -1) {
+          sb.append(inputBuffer, 0, l);
+          println("write data", inputBuffer, 0, l);
+        }
+        // CONVERT BYTES TO STRING
+        fileContent = sb.toString();
+
+        fis.close();
+      }
+      catch (Exception e) {
+        println("cannot fetch file", e);
+        println("cannot fetch file", file2.getAbsolutePath());
+      } 
+      finally {
+        if (fis != null) {
+
+          fis = null;
+        }
+      }
+    }
+    return fileContent;
+  };
+
+  void open() {
+  };
+
+  void close() {
+    writeCount++;
+    if (writeCount>0)append = true;
+
+    try {
+      output.flush();
+      output.close();
+    }
+    catch(IOException e) {
+    }
+  };
+  
+  void writeLine(String s){
+    if (writeFile&&location!=null) {
+      //println("write");
+      writeLn(s);
+      close();
+      loadStrings();
+    }
+  };
+
+  void write(String s) {
+
+    if (!overWrite)checkLocation();
+    try {
+
+      output = new FileWriter(file2, append);
+    }
+    catch(IOException e) {
+    }
+    printWrite(s);
+  };
+
+  void writeLn(String s) {
+    if (!overWrite)checkLocation();
+    println("writeln", s);
+    try {
+      output = new FileWriter(file2, append);
+    }
+    catch(IOException e) {
+    }
+    printWriteLn(s);
+  };
+
+  void write(String []s) {
+    if (!overWrite)checkLocation();
+    try {
+      output = new FileWriter(file2, append);
+    }
+    catch(IOException e) {
+    }
+    printWrite(s);
+  };
+
+  void writeLn(String []s) {
+    if (!overWrite)checkLocation();
+    try {
+      output = new FileWriter(file2, append);
+    }
+    catch(IOException e) {
+    }
+    printWriteLn(s);
+  };
+
+  void printWrite(String s) {
+    if (!overWrite)checkLocation();
+    try {
+      output.append(s);
+    }
+    catch(IOException e) {
+    }
+    catch(NullPointerException e) {
+      println("printw s fail", file2, e);
+    }
+  };
+
+  void printWriteLn(String s) {
+    if (!overWrite)checkLocation();
+    try {
+      println("write", s);
+      output.append(s);
+      output.append("\n");
+    }
+    catch(IOException e) {
+    }
+    catch(NullPointerException e) {
+      println("printwln s fail", file2, e);
+    }
+  };
+
+  void printWrite(String []s) {
+    if (!overWrite)checkLocation();
+    try {
+      for (int i=0; i<s.length; i++) {
+        output.append(s[i]);
+      }
+    }
+    catch(IOException e) {
+    }
+    catch(NullPointerException e) {
+      println("printwln s fail", file2, e);
+    }
+  };
+
+  void printWriteLn(String []s) {
+    if (!overWrite)checkLocation();
+    try {
+      for (int i=0; i<s.length; i++) {
+        output.append(s[i]);
+        output.append("\n");
+      }
+    }
+    catch(IOException e) {
+    }
+    catch(NullPointerException e) {
+      println("printwln s fail", file2, e);
+    }
+  };
+
+
+  File findFolder() {
+
+    if (!folderExists) {
+      try { 
+        file = new File(absolutePath + "/" + folderPath);
+        PApplet.println("checking folder", file);
+        if (!file.exists()) {
+          file.mkdirs();
+          folderCreated = true;
+          file2 = new File(file, "/"+fileName + "." + ext);
+        } else {
+          folderExists = true;
+          PApplet.println("folder Exists");
+        }
+      } 
+      catch (Exception e) { 
+        failCount++;
+        if (failCount<5)PApplet.println("Error while creating folder: " + absolutePath, folderPath);
+      }
+    }
+    return file;
+  };
+
+  void checkLastFile() {
+    String s2 = file +"/"+fileName;
+    String s1 = fileName + counter + "." + ext;
+    if (!writeFile) {
+      getFolderLength(file.getAbsolutePath());
+      getLastIndex(file.getAbsolutePath());
+    }
+    //if(counter==-1)
+    if (true) {
+      if (writeFile&&(folderCreated||overWrite||counter==-1&&!overWrite)) {
+        currentFile = s1;
+        s2 = file +"/"+ fileName + "." + ext;
+        //println("create file/overWrite");
+      } else if (writeFile) {
+        s2 += counter + "." + ext;
+        currentFile = s2;
+        //println("overfile");
+      } else {
+        currentFile = s1;
+        s2 = file +"/"+ fileName + "." + ext;
+        //println("check condition");
+      }
+    }
+    
+    file2 = new File(s2);
+    //if(!overWrite&&writeFile)
+    println("check last index", file2, s1);
+    if (writeFile&&folderExists) {
+      fileExists = true;
+      if (!saveImage&&!saveAudio&&!saveVideo) {
+        try {
+          output = new FileWriter(file2, append);
+        }
+        catch(IOException e) {
+        }
+      }
+      writeCount ++;
+    }
+  };
+
+  public void checkLocation() {
+
+    PApplet.println("find folder");
+    findFolder();
+    checkLastFile();
+  };
+
+  void dboxLogic() {
+    tab t = dbox.main;
+    tab t1 = dbox1.main;
+    if (Bms.mousePressed)showDialogue = true;
+    if (getWritePermission)showDialogue = false;
+
+    if (showDialogue) {
+      if (Bms.click)println("show Dialogue");
+      if (!folderExists||!folderExists&&!fileExists) {
+        if (Bms.click)println("no folder");
+
+        if (dbox!=null) {
+          //if(!folderCreated)t.title.label = title1 +" " + fileName +"."+ext;
+          //else 
+          t.title.label = title1 +" " + fileName +"."+ext;
+          if (t.toggle(0, f, "getWritePermission")) {
+            writeFile = true;
+            overWrite = true;
+            getWritePermission = true;
+            println("folder found new file yes");
+          }
+          if (dbox.main.toggle(1, f, "getWritePermission")) {
+            getWritePermission = true;
+            println("folder found new file no");
+          }
+        }
+      } else {
+        if (Bms.click)println("file found", fileName +"."+ext);
+        //androidDialogueTitle = file2.getAbsolutePath();
+        //String s1 = file.getAbsolutePath();
+        if (dbox1!=null) {
+          if (fileExists)t1.title.label = title2 +" " + fileName +"."+ext;
+          else t1.title.label = title1 +" " + fileName +"."+ext;
+          if (t1.toggle(0, f, "getWritePermission")) {
+            writeFile = true;
+            overWrite = true;
+            getWritePermission = true;
+            println("folder created new file yes", file2);
+          }
+          if (dbox1.main.toggle(1, f, "getWritePermission")) {
+            if (fileExists)writeFile = true;
+
+            getWritePermission = true;
+            println("folder created new file no");
+          }
+        }
+      }
+    }
+  };
+
+  public void logic() {
+    if (mousePressed&&!mdown) {
+      img = applet.get();
+      mdown = true;
+    }
+    if (!mousePressed)mdown = false;
+  };
+
+  void saveImage() {
+    if (writeFile) {
+      logic();
+      println("saveImage", file2, fileName, counter, ext);
+      String s1 = file2.getAbsolutePath();
+      println(s1);
+      img.save(s1);
+      if (!overWrite)counter++;
+      if (!overWrite)file2 = new File(file+"/"+fileName+counter+"."+ext);
+      else file2 = new File(file+"/"+fileName+"."+ext);
+    }
+  };
+
+  void listen() {
+    //if(writeFile&&dbox.main.getButton(0).click)checkLocation();
+  };
+
+  void readContents() {
+    if (fileContent!=null) {
+      fill(0);
+      text(counter, 20, 10);
+      text(fileContent, 20, 20);
+    } else {
+      fill(0);
+      text("no file", 20, 20);
+    }
+  };
+
+
+  void setLocation(String s) {
+    if (getPermission)getAndroidInfo();
+    location = s;
+    folderPath = s.substring(0, s.lastIndexOf("/"));
+    fileName = s.replace(folderPath+"/", "");
+    getExt(fileName);
+    PApplet.println("Fname", folderPath);
+    PApplet.println("fileName", fileName);
+    PApplet.println("counter", counter);
+    PApplet.println("ext", ext);
+    checkLocation();
+    init();
+  }
+
+  void getExt(String location) {
+
+    int count = 0;
+    fileName = location.substring(0, location.indexOf("."));
+    ext = location.replace(fileName, "");
+    ext = ext.replace(".", "");
+    ext = ext.replace(fileName, "");
+  };
+
+  void drawDialogue() {
+    dboxLogic();
+    if (Bms.mousePressed)showDialog = true;
+    if (getWritePermission)showDialog = false;
+    if (showDialog) {
+      fill(255);
+      rect(0, 0, width, height);
+      if (dbox!=null&&!fileExists&&!writeFile)dbox.draw();
+      if (dbox1!=null&&fileExists&&!writeFile)dbox1.draw();
+      if (dbox2!=null)dbox2.draw();
+      if (dbox3!=null)dbox3.draw();
+    }
+  };
+  
+  void dialogBox() {
+
+    if (location!=null) {
+      msg = new TextView(activity); 
+      msg.setBackgroundColor(Color.BLUE);
+      msg.setTextSize(32);
+      msg.setText(dialogueBody); 
+      msg.setGravity(Gravity.CENTER_HORIZONTAL); 
+      msg.setTextColor(Color.WHITE); 
+
+      activity.runOnUiThread(new Runnable() {
+        public void run() {
+          AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+          builder.setView(msg);
+
+          androidDialogueTitle += " "+fileName+"."+ext+"?";
+          builder.setTitle(androidDialogueTitle);
+          builder.setPositiveButton(dialogueB1Title, 
+            new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, 
+              int which) {
+              writeFile = true;
+              overWrite = false;
+              reWrite = true;
+            }
+          }
+          );
+          builder.setNegativeButton(dialogueB2Title, 
+            new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, 
+              int which) {
+              writeFile = true;
+              overWrite = true;
+              //act.finish();
+            }
+          }
+          )
+          .show();
+        }
+      }
+      );
+    }
+  };
+
+  void setAndroidDialogue(String s1, String s2) {
+    dialogueB1Title = s1;
+    dialogueB2Title = s2;
+  };
+
+  void setAndroidDialogue(String s1, String s2, String s3) {
+    androidDialogueTitle = s1;
+    dialogueB1Title = s2;
+    dialogueB2Title = s3;
+  };
+
+  void setAndroidDialogueTitle(String s1) {
+    androidDialogueTitle = s1;
+  };
+
+  void setDialogueColor() {
+  };
+
+  public boolean click() {
+    boolean k = false;
+    if (pos()&&applet.mousePressed&&!click) {
+      click = true;
+      k = false;
+    } else if (click&&!applet.mousePressed) {
+      k = true;
+      click = false;
+    }
+    return k;
+  };
+
+  public  boolean pos(PVector mouse) {
+    return mouse.x>x&&mouse.x<x+w&&mouse.y>y&&mouse.y<y+h;
+  };
+
+  public  boolean pos() {
+    return applet.mouseX>x&&applet.mouseX<x+w&&applet.mouseY>y&&applet.mouseY<y+h;
+  };
+
+  int getFolderLength(String s1) {
+    String path = s1;
+    File directory = new File(path);
+    File[] files = directory.listFiles();
+    if (files!=null) folderSize = files.length;
+    return folderSize;
+  };
+
+  int getLastIndex(String s1) {
+    String  []s = null;
+    String path = s1;
+    //println("Files", "Path: " + path);
+    File directory = new File(path);
+    File[] files = directory.listFiles();
+    int count = -1;
+
+    if (!checkFile) {
+      if (!writeFile)counter = -1;
+      s = new String [files.length];
+      //println("Files", "Size: "+ files.length);
+      for (int i = 0; i < files.length; i++) {
+        s[i] = files[i].getName();
+        if (s[i].contains(fileName)) {
+          s[i] = s[i].replace(".txt", "");
+          s[i] = s[i].replace(".doc", "");
+          s[i] = s[i].replace(".docx", "");
+          s[i] = s[i].replace(".mp3", "");
+          s[i] = s[i].replace(".mp4", "");
+          s[i] = s[i].replace(".jpg", "");
+          s[i] = s[i].replace(".JPG", "");
+          s[i] = s[i].replace(".bmp", "");
+          s[i] = s[i].replace(".BMP", "");
+          s[i] = s[i].replace(".gif", "");
+          s[i] = s[i].replace(".GIF", "");
+          s[i] = s[i].replace(".wav", "");
+          s[i] = s[i].replace(".ogg", "");
+          s[i] = s[i].replace(".wmv", "");
+          s[i] = s[i].replace(fileName, "");
+          s[i] = s[i].replace(fileName, "");
+          int num = parseInt(s[i]);
+          if (isNumeric(s[i])&&num>=counter)counter = num;
+          if (s[i].length()==0)count = 0;
+        }
+        if (s[i].contains(fileName+"."+ext))count++;
+      }
+      //println("Counter:", counter,count);
+      counter ++;
+    }
+    String s2 = path+"/"+fileName+"."+ext;
+    String s3 = fileName+"."+ext;
+    if (count>-1)fileExists = true;
+    currentFile = s3;
+    //println("get last index:", s3);
+    checkFile = true;
+    return counter;
+  };
+
+  public boolean isNumeric(String str) { 
+    try {  
+      Double.parseDouble(str);  
+      return true;
+    } 
+    catch(NumberFormatException e) {  
+      return false;
+    }
+  }
+};
